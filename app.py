@@ -19,19 +19,24 @@ current_index = 0
 match_message = ""
 user_profile = None
 
-@app.route('/')
+@app.route('/', strict_slashes=False)
 def index():
     global current_index, match_message, user_profile
+    
+    # Считываем параметры ВК, чтобы они не ломали сервер
+    vk_user_id = request.args.get('vk_user_id')
+    
     if not user_profile:
-        return redirect(url_for('register'))
+        return redirect(url_for('register', **request.args)) # Передаем параметры ВК на страницу регистрации
+        
     if current_index >= len(moms_database):
         current_index = 0
+        
     mom = moms_database[current_index]
     msg = match_message
     match_message = "" 
     
     response = make_response(render_template('index.html', mom=mom, match_message=msg, user=user_profile))
-    # Современная защита, которая разрешает открывать сайт внутри фреймов ВК
     response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://vk.com https://*.vk.com https://vkmini.apps;"
     return response
 
@@ -51,7 +56,7 @@ def register():
         except Exception as e:
             print(f"Ошибка записи в файл: {e}")
             
-        return redirect(url_for('index'))
+        return redirect(url_for('index', **request.args)) # Возвращаем параметры ВК обратно
         
     response = make_response(render_template('register.html'))
     response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://vk.com https://*.vk.com https://vkmini.apps;"
