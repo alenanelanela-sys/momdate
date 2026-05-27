@@ -31,7 +31,8 @@ def index():
     match_message = "" 
     
     response = make_response(render_template('index.html', mom=mom, match_message=msg, user=user_profile))
-    response.headers['X-Frame-Options'] = 'ALLOW-FROM https://vk.com'
+    # Современная защита, которая разрешает открывать сайт внутри фреймов ВК
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://vk.com https://*.vk.com https://vkmini.apps;"
     return response
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -53,7 +54,7 @@ def register():
         return redirect(url_for('index'))
         
     response = make_response(render_template('register.html'))
-    response.headers['X-Frame-Options'] = 'ALLOW-FROM https://vk.com'
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://vk.com https://*.vk.com https://vkmini.apps;"
     return response
 
 @app.route('/swipe', methods=['POST'])
